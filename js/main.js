@@ -53,4 +53,46 @@ fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
     .catch(error => console.error(error));
 
 
+//Ejercicio 3: Buscador de Pokemon 
+const inputBuscar = document.createElement('input');
+inputBuscar.id = 'inputBuscar';
+inputBuscar.placeholder = 'Buscar Pokémon por nombre o ID';
+inputBuscar.style.margin = '1rem';
 
+const btnBuscar = document.createElement('button');
+btnBuscar.id = 'btnBuscar';
+btnBuscar.textContent = 'Buscar';
+
+const resultado = document.createElement('div');
+resultado.id = 'resultado';
+resultado.style.marginTop = '1rem';
+resultado.style.textAlign = 'center';
+
+const main = document.querySelector('main') || document.body; // fallback por si no hay <main>
+main.appendChild(inputBuscar);
+main.appendChild(btnBuscar);
+main.appendChild(resultado);
+
+btnBuscar.addEventListener('click', async () => {
+  const nombre = inputBuscar.value.toLowerCase().trim();
+  if (!nombre) return;
+
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${nombre}`);
+    if (!res.ok) throw new Error('Pokémon no encontrado');
+    const pokemon = await res.json();
+
+    const tipos = pokemon.types.map(t => t.type.name);
+
+    resultado.innerHTML = `
+      <h3>${pokemon.name.toUpperCase()} (#${pokemon.id})</h3>
+      <img src="${pokemon.sprites.other['official-artwork'].front_default}" alt="${pokemon.name}">
+      <div class="pokemon-tipos">
+        ${tipos.map(t => `<p class="tipo ${t}">${t}</p>`).join('')}
+      </div>
+      <p>Altura: ${pokemon.height} | Peso: ${pokemon.weight}</p>
+    `;
+  } catch (err) {
+    resultado.innerHTML = `<p>${err.message}</p>`;
+  }
+});
